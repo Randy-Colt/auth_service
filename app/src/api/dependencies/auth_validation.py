@@ -1,6 +1,6 @@
 from fastapi import HTTPException, status
 
-from src.utils.password_hashing import check_password
+from src.utils import check_password
 
 class Mock:
     password = 'qwerty'
