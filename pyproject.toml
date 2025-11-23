@@ -1,0 +1,33 @@
+[project]
+name = "src"
+version = "0.1.0"
+description = "Микросервис для аутентификации, авторизации и выдачи пользователей для E2E тестов"
+authors = [
+    {name = "Андрей Логвинов",email = "andryu04101999@gmail.com"}
+]
+readme = "../README.md"
+requires-python = ">=3.13"
+
+dependencies = [
+    "fastapi (>=0.121.3,<0.122.0)",
+    "sqlalchemy (>=2.0.44,<3.0.0)",
+    "pydantic-settings (>=2.12.0,<3.0.0)",
+    "asyncpg (>=0.30.0,<0.31.0)",
+    "uvicorn (>=0.38.0,<0.39.0)",
+    "bcrypt (>=5.0.0,<6.0.0)",
+    "pyjwt[crypto] (>=2.10.1,<3.0.0)",
+    "pydantic[email] (>=2.12.4,<3.0.0)",
+    "alembic (>=1.17.2,<2.0.0)"
+]
+
+[dependency-groups]
+dev = [
+    "aiosqlite (>=0.21.0,<0.22.0)",
+    "pytest (>=9.0.1,<10.0.0)",
+    "pytest-asyncio (>=1.3.0,<2.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

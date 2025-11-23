@@ -1,3 +1,3 @@
 #!bin/bash
-openssl ecparam -genkey -name prime256v1 -noout -out private_key.pem && \
-openssl ec -in private_key.pem -pubout -out public_key.pem
+openssl ecparam -genkey -name prime256v1 -noout -out ../certs/private_key.pem && \
+openssl ec -in ../certs/private_key.pem -pubout -out ../certs/public_key.pem
