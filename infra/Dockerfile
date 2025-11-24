@@ -7,7 +7,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN pip install poetry
 
-COPY ../src/pyproject.toml ../src/poetry.lock ./
+COPY src/pyproject.toml src/poetry.lock ./
 
 RUN poetry install --no-root
 
@@ -15,12 +15,16 @@ RUN poetry install --no-root
 # тесты
 FROM builder AS test
 
-WORKDIR /app
+WORKDIR /src
 
-# Copy project source
-COPY ../src .
+COPY src/ .
+COPY src/pyproject.toml src/poetry.lock ./
 
-COPY ./run_tests.sh .
+RUN poetry install --no-root --with dev
+
+COPY infra/create_keys.sh .
+COPY infra/run_tests.sh .
+
 RUN chmod +x run_tests.sh
 
 ENTRYPOINT ["./run_tests.sh"]
@@ -36,14 +40,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 RUN pip install poetry
 
-COPY ../src/pyproject.toml ../src/poetry.lock ./
+COPY src/pyproject.toml src/poetry.lock ./
 
 RUN poetry install --no-root --without dev
 
-COPY ../src .
+COPY src .
 
-COPY entrypoint.sh .
-COPY create_keys.sh .
+COPY infra/entrypoint.sh .
+COPY infra/create_keys.sh .
 
 RUN chmod +x entrypoint.sh create_keys.sh
 

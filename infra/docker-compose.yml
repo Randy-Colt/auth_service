@@ -1,9 +1,9 @@
 volumes:
-  pg_data:
+  auth_service_db:
   certs:
 
 services:
-  db:
+  auth_service_db:
     image: postgres:15
     container_name: auth_service_db
     env_file: ../example.env
@@ -13,26 +13,26 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - auth_service_db:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: infra/Dockerfile
       target: production
     container_name: auth_service
     env_file: ../example.env
     depends_on:
-      db:
+      auth_service_db:
         condition: service_healthy
     volumes:
       - certs:/certs
     ports:
       - "8000:8000"
     healthcheck:
-      test: ["CMD",  "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/healthcheck')"]
+      test: ["CMD-SHELL", "curl -f http://0.0.0.0:8000/api/v1/healthcheck || exit 1"]
       interval: 3s
       timeout: 2s
       retries: 3
@@ -40,8 +40,8 @@ services:
 
   tests:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: .. 
+      dockerfile: infra/Dockerfile
       target: test
     container_name: auth_service_tests
     volumes:

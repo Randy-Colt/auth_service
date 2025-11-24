@@ -22,8 +22,8 @@ class Settings(BaseSettings):
     db_port: str = '5432'
     use_sqlite: bool = True
 
-    private_key_path: Path = PROJECT_DIR / 'certs' / 'private_key.pem'
-    public_key_path: Path = PROJECT_DIR / 'certs' / 'public_key.pem'
+    private_key_path: Path = Path('/certs/private_key.pem')
+    public_key_path: Path = Path('/certs/public_key.pem')
     algoritm: str = 'ES256'
     access_token_expire_minutes: int = 10
 
