@@ -12,11 +12,18 @@ from app.crud import exceptions as crud_exc
 from app.db.models import User
 
 
-@dataclass(slots=True, eq=False)
+@dataclass(slots=True, eq=False, frozen=True)
 class UserRepository:
+    """Репозиторий для выполнения операций с базой данных."""
+
     session: AsyncSession
 
     async def create_user(self, user_schema: dict[str, Any]) -> User:
+        """
+        Создаёт юзера согласно необходимым полям.
+
+        Если login уже существует в базе, выбрасывает LoginExistsException.
+        """
         user = User(**user_schema)
         self.session.add(user)
         try:
@@ -28,6 +35,11 @@ class UserRepository:
         return user
 
     async def set_locktime(self, uuid: UUID) -> User:
+        """
+        Устанавливает временную метку.
+
+        Если пользователь уже в обработке, выбрасывает OperationalError
+        """
         try:
             result = await self.session.execute(
                 select(User).where(User.id == uuid)
@@ -46,6 +58,7 @@ class UserRepository:
         return user
 
     async def set_locktime_to_null(self, uuid: UUID) -> User:
+        """Обнуляет locktime."""
         result = await self.session.execute(
             select(User).where(User.id == uuid)
         )
@@ -62,12 +75,17 @@ class UserRepository:
         return user
 
     async def get_users(self, schema_type: BaseModel) -> list[dict[str, Any]]:
+        """Получает всех существующих пользователей в виде списка словарей."""
         result = await self.session.execute(
             select(*self._select_user_by_schema(schema_type))
         )
         return result.mappings().all()
 
     def _select_user_by_schema(self, schema_type: BaseModel) -> list[Column]:
+        """
+        Согласно переданной схеме возвращает список атрибутов,
+        которые нужно передать в select.
+        """
         return [
             getattr(User, attr) for attr in schema_type.__annotations__.keys()
             if hasattr(User, attr)

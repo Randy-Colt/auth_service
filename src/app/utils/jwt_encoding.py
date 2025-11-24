@@ -12,6 +12,12 @@ def encode_jwt(
     algorithm: str = settings.algoritm,
     expire_minures: int = settings.access_token_expire_minutes
 ) -> str:
+    """
+    Обёртка для преобразования пэйлоада в jwt.
+
+    Также устанавливает iat = время выпуска токена и
+    exp = время, когда срок жизни токена истечёт.
+    """
     to_encode = payload.copy()
     now = datetime.now(UTC)
     to_encode.update(

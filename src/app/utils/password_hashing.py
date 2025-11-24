@@ -2,8 +2,5 @@ from bcrypt import gensalt, hashpw
 
 
 def hash_password(password: str) -> bytes:
+    """Обёртка для хэширования пароля с солью."""
     return hashpw(password.encode(), gensalt())
-
-
-# def check_password(password: str, hashed_password: bytes) -> bool:
-#     return checkpw(password, hashed_password)

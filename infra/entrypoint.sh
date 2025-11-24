@@ -1,7 +1,9 @@
-#!bin/bash
-if [ ! -f "../certs/private_key.pem" ]; then
-  /bin/bash ./create_keys.sh
+#!/bin/bash
+set -e
+
+if [ ! -f "/certs/private_key.pem" ]; then
+  ./create_keys.sh
 fi
 
-alembic upgrade head && \
+poetry run alembic upgrade head && \
 poetry run main.py

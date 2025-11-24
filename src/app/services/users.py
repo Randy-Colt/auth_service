@@ -9,11 +9,14 @@ from app.services import exceptions as service_exc
 from app.utils import encode_jwt, hash_password
 
 
-@dataclass(slots=True, eq=False)
+@dataclass(slots=True, eq=False, frozen=True)
 class UserService:
+    """Сервис для работы с пользователями."""
+
     user_repo: UserRepository
 
     async def create_user(self, user_schema: CreateUserSchema) -> UserSchema:
+        """Создаёт пользователя, хэшируя переданный пароль"""
         user_dict = user_schema.model_dump(exclude={'password'})
         hashed_password = hash_password(
             user_schema.password.get_secret_value()
@@ -27,10 +30,15 @@ class UserService:
         return UserSchema.model_validate(user)
 
     async def get_users(self) -> list[UserSchema]:
+        """Возвращает список всех пользователей."""
         users = await self.user_repo.get_users(UserSchema)
         return [UserSchema.model_validate(user) for user in users]
 
     async def aquire_lock(self, user_id: UUID) -> TokenSchema:
+        """
+        Устанавливает временную метку и возвращает токен с закодированными
+        основными данными пользователя (в соответствии с UserSchema).
+        """
         try:
             user = await self.user_repo.set_locktime(user_id)
         except crud_exc.NoResultFoundException:
@@ -47,6 +55,7 @@ class UserService:
         return TokenSchema(access_token=token)
 
     async def release_lock(self, user_id: UUID) -> UserSchema:
+        """Освобождает пользователя, делая возможным его захват вновь."""
         try:
             user = await self.user_repo.set_locktime_to_null(user_id)
         except crud_exc.NoResultFoundException:

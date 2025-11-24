@@ -16,6 +16,7 @@ router = APIRouter(prefix='/users', tags=['users'])
 async def get_users(
     user_service: UserService = Depends(get_user_service)
 ) -> list[UserSchema]:
+    """Возвращает список всех существующих пользователей."""
     return await user_service.get_users()
 
 
@@ -25,6 +26,13 @@ async def aquire_user(
     response: Response,
     user_servise: UserService = Depends(get_user_service)
 ) -> TokenSchema:
+    """
+    Захватить юзера для проведения тестов.
+
+    :param user_id: id пользователя, которого нужно захватить
+    :return: jwt-токен возвращается в ответе и устанавливается в заголовок
+    Authorization ответа.
+    """
     try:
         token = await user_servise.aquire_lock(user_id)
     except service_exc.UserIsBusyException as e:
@@ -53,6 +61,13 @@ async def release_user(
     user_id: UUID,
     user_servise: UserService = Depends(get_user_service)
 ) -> UserSchema:
+    """
+    Освободить юзера.
+
+    Сработает даже если locktime юзера None.
+    :param user_id: id юзера, которого следует освододить
+    :return: данные освобождённого пользователя.
+    """
     try:
         user = await user_servise.release_lock(user_id)
     except service_exc.UserNotFoundException as e:
@@ -68,6 +83,11 @@ async def create_user(
     user_schema: CreateUserSchema,
     user_servise: UserService = Depends(get_user_service)
 ) -> UserSchema:
+    """
+    Создать нового пользователя.
+
+    :return: данные созданного пользователя.
+    """
     try:
         return await user_servise.create_user(user_schema)
     except service_exc.LoginAlreadyExistsException as e:

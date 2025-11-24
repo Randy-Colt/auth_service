@@ -1,11 +1,52 @@
-FROM python:3.10-slim
- 
-WORKDIR /src
+FROM python:3.13-slim AS builder
 
-ENV PYTHONDONTWRITEBYTECODE 1
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
 
 RUN pip install poetry
 
-RUN poetry install --no-dev --no-root
+COPY ../src/pyproject.toml ../src/poetry.lock ./
+
+RUN poetry install --no-root
+
+
+# тесты
+FROM builder AS test
+
+WORKDIR /app
+
+# Copy project source
+COPY ../src .
+
+COPY ./run_tests.sh .
+RUN chmod +x run_tests.sh
+
+ENTRYPOINT ["./run_tests.sh"]
+
+
+# старт приложения
+FROM python:3.13-slim AS production
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+RUN pip install poetry
+
+COPY ../src/pyproject.toml ../src/poetry.lock ./
+
+RUN poetry install --no-root --without dev
+
+COPY ../src .
+
+COPY entrypoint.sh .
+COPY create_keys.sh .
+
+RUN chmod +x entrypoint.sh create_keys.sh
 
 EXPOSE 8000
+
+ENTRYPOINT ["./entrypoint.sh"]

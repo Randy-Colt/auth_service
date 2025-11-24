@@ -5,10 +5,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """
+    Класс с конфигурацией приложения.
+
+    Если use_sqlite True, то будет использоваться sqlite в качестве
+    базы данных.
+    """
+
     PROJECT_DIR: Path = Path(__file__).resolve().parent.parent.parent.parent
     model_config = SettingsConfigDict(env_file=PROJECT_DIR / 'example.env')
 
-    debug: bool = False
     postgres_db: str = 'db'
     postgres_user: str = 'user'
     postgres_password: str = 'password'
