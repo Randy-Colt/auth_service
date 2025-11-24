@@ -22,7 +22,7 @@ services:
     build: ./
     ports:
       - 8000:8000
-    command: 
+    command: /bin/bash ./entrypoint.sh
     env_file: ../example.env
     depends_on:
       - db
