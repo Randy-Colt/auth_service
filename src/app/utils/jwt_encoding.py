@@ -1,7 +1,7 @@
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from jwt import decode, encode
+from jwt import encode
 
 from app.configs import settings
 
@@ -23,11 +23,3 @@ def encode_jwt(
         private_key,
         algorithm
     )
-
-
-def decode_jwt(
-    token: str | bytes,
-    public_key: str = settings.public_key_path.read_text(),
-    algorithm: str = settings.algoritm
-) -> Any:
-    return decode(token, public_key, [algorithm])

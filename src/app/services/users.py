@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 from uuid import UUID
 
+from app.crud import exceptions as crud_exc
 from app.crud.users import UserRepository
 from app.schemas.auth import TokenSchema
 from app.schemas.users import CreateUserSchema, UserSchema
-from app.utils import hash_password, encode_jwt
+from app.services import exceptions as service_exc
+from app.utils import encode_jwt, hash_password
 
 
 @dataclass(slots=True, eq=False)
@@ -17,7 +19,11 @@ class UserService:
             user_schema.password.get_secret_value()
         )
         user_dict['password'] = hashed_password
-        user = await self.user_repo.create_user(user_dict)
+        try:
+            user = await self.user_repo.create_user(user_dict)
+        except crud_exc.LoginExistsException:
+            raise service_exc.LoginAlreadyExistsException
+
         return UserSchema.model_validate(user)
 
     async def get_users(self) -> list[UserSchema]:
@@ -25,7 +31,13 @@ class UserService:
         return [UserSchema.model_validate(user) for user in users]
 
     async def aquire_lock(self, user_id: UUID) -> TokenSchema:
-        user = await self.user_repo.set_locktime(user_id)
+        try:
+            user = await self.user_repo.set_locktime(user_id)
+        except crud_exc.NoResultFoundException:
+            raise service_exc.UserNotFoundException
+        except crud_exc.LocktimeIsntNoneException:
+            raise service_exc.UserIsBusyException
+
         payload = UserSchema.model_validate(user).model_dump(
             include={'id', 'project_id'}
         )
@@ -35,5 +47,9 @@ class UserService:
         return TokenSchema(access_token=token)
 
     async def release_lock(self, user_id: UUID) -> UserSchema:
-        user = await self.user_repo.set_locktime_to_null(user_id)
+        try:
+            user = await self.user_repo.set_locktime_to_null(user_id)
+        except crud_exc.NoResultFoundException:
+            raise service_exc.UserNotFoundException
+
         return UserSchema.model_validate(user)

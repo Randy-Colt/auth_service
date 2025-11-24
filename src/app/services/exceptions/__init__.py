@@ -1,8 +1,6 @@
-from src.services.exceptions.users_exc import (
-    LoginAlreadyExistsException,
-    UserIsBusyException,
-    UserNotFoundException
-)
+from app.services.exceptions.users_exc import (LoginAlreadyExistsException,
+                                               UserIsBusyException,
+                                               UserNotFoundException)
 
 __all__ = [
     'LoginAlreadyExistsException',

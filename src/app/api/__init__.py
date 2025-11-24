@@ -2,12 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.auth_handlers import router as auth_router
 from app.api.users_handlers import router as users_router
 from app.db.session import get_session
 
 api_router = APIRouter(prefix='/v1', tags=['api'])
-api_router.include_router(auth_router)
 api_router.include_router(users_router)
 
 

@@ -3,12 +3,12 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import Column, select
-from sqlalchemy.exc import NoResultFound, IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel
+from sqlalchemy import Column, select
+from sqlalchemy.exc import IntegrityError, NoResultFound
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services import exceptions as service_exc
+from app.crud import exceptions as crud_exc
 from app.db.models import User
 
 
@@ -23,7 +23,7 @@ class UserRepository:
             await self.session.commit()
         except IntegrityError as e:
             if str(e.orig).endswith('login'):
-                raise service_exc.LoginAlreadyExistsException
+                raise crud_exc.LoginExistsException
         await self.session.refresh(user)
         return user
 
@@ -35,10 +35,10 @@ class UserRepository:
             )
             user = result.scalar_one()
         except NoResultFound:
-            raise service_exc.UserNotFoundException
+            raise crud_exc.NoResultFoundException
 
         if user.locktime is not None:
-            raise service_exc.UserIsBusyException
+            raise crud_exc.LocktimeIsntNoneException
 
         user.locktime = datetime.now()
         await self.session.commit()
@@ -52,7 +52,7 @@ class UserRepository:
         try:
             user = result.scalar_one()
         except NoResultFound:
-            raise service_exc.UserNotFoundException
+            raise crud_exc.NoResultFoundException
 
         if user.locktime is None:
             return user

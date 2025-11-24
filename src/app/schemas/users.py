@@ -2,14 +2,8 @@ from enum import StrEnum
 from typing import Annotated
 
 from annotated_types import MaxLen, MinLen
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    EmailStr,
-    PastDatetime,
-    UUID4,
-    SecretStr
-)
+from pydantic import (UUID4, BaseModel, ConfigDict, EmailStr, PastDatetime,
+                      SecretStr)
 
 
 class EnvEnum(StrEnum):

@@ -3,12 +3,11 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.exc import OperationalError
 
+from app.api.dependencies.service_factory import get_user_service
 from app.schemas.auth import TokenSchema
 from app.schemas.users import CreateUserSchema, UserSchema
-from app.services.users import UserService
 from app.services import exceptions as service_exc
-from app.api.dependencies.service_factory import get_user_service
-
+from app.services.users import UserService
 
 router = APIRouter(prefix='/users', tags=['users'])
 

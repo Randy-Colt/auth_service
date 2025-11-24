@@ -1,7 +1,7 @@
-from datetime import datetime
 import uuid
+from datetime import datetime
 
-from sqlalchemy import func, TIMESTAMP, Uuid
+from sqlalchemy import TIMESTAMP, DateTime, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.database import Base
@@ -13,7 +13,10 @@ class User(Base):
         primary_key=True,
         default=uuid.uuid4
     )
-    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.timezone('UTC+3', func.now())
+    )
     login:  Mapped[str] = mapped_column(unique=True)
     password: Mapped[bytes]
     project_id: Mapped[uuid.UUID] = mapped_column(Uuid)
